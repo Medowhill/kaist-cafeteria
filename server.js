@@ -29,7 +29,19 @@ function getMenus(name, y, m, d, cb) {
 
     const $ = cheerio.load(body);
     const tds = $('td');
-    const get = i => tds.eq(i).text().split(/\s/).filter(s => s.length).join(' ');
+    function get(i) {
+      return tds
+        .eq(i)
+        .text()
+        .replace(/[1-9],[0-9][0-9][0-9]원/g, '')
+        .replace(/[1-9],[0-9][0-9][0-9]/g, '')
+        .replace(/[0-9][0-9][0-9]원/g, '')
+        .replace(/[0-9][0-9][0-9]/g, '')
+        .replace(/\(([0-9]+,)*[0-9]+\)/g, '')
+        .split(/\s/)
+        .filter(s => s.length)
+        .join(' ');
+    }
     const breakfast = get(0);
     const lunch = get(1);
     const dinner = get(2);
