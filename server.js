@@ -13,17 +13,47 @@ app.use(cors());
 
 app.get('/', (req, res) => {
   const { name, y, m ,d } = req.query;
-  getMenus(name, y, m, d, data => {
-    res.json(data);
-  });
+  if (y && m && d) {
+    const url = `https://www.kaist.ac.kr/kr/html/campus/053001.html?dvs_cd=${name}&stt_dt=${y}-${m}-${d}`;
+    getMenus(url, data => res.json(data));
+  } else {
+    const url = `https://www.kaist.ac.kr/kr/html/campus/053001.html?dvs_cd=${name}`;
+    getMenus(url, data => {
+      const { breakfast, lunch, dinner } = data;
+      function title(str) {
+        return {
+          type: 'section',
+          text: {
+            type: 'mrkdwn',
+            text: `*${str}*`
+          }
+        };
+      }
+      function content(str) {
+        return {
+          type: 'section',
+          text: {
+            type: 'plain_text',
+            text: str
+          }
+        };
+      }
+      const blocks = [
+        title('아침'), content(breakfast),
+        title('점심'), content(lunch),
+        title('저녁'), content(dinner),
+      ];
+      res.json({ blocks });
+    });
+  }
 });
 
 app.listen(port, () => {
   console.log(`Listening on port ${port}.`);
 });
 
-function getMenus(name, y, m, d, cb) {
-  request(`https://www.kaist.ac.kr/kr/html/campus/053001.html?dvs_cd=${name}&stt_dt=${y}-${m}-${d}`, (err, res, body) => {
+function getMenus(url, cb) {
+  request(url, (err, res, body) => {
     if (err || res.statusCode !== 200) {
       cb({ breakfast: '', lunch: '', dinner: '' });
       return;
