@@ -13,39 +13,40 @@ app.use(cors());
 
 app.get('/', (req, res) => {
   const { name, y, m ,d } = req.query;
-  if (y && m && d) {
-    const url = `https://www.kaist.ac.kr/kr/html/campus/053001.html?dvs_cd=${name}&stt_dt=${y}-${m}-${d}`;
-    getMenus(url, data => res.json(data));
-  } else {
-    const url = `https://www.kaist.ac.kr/kr/html/campus/053001.html?dvs_cd=${name}`;
-    getMenus(url, data => {
-      const { breakfast, lunch, dinner } = data;
-      function title(str) {
-        return {
-          type: 'section',
-          text: {
-            type: 'mrkdwn',
-            text: `*${str}*`
-          }
-        };
-      }
-      function content(str) {
-        return {
-          type: 'section',
-          text: {
-            type: 'plain_text',
-            text: str
-          }
-        };
-      }
-      const blocks = [
-        title('아침'), content(breakfast),
-        title('점심'), content(lunch),
-        title('저녁'), content(dinner),
-      ];
-      res.json({ blocks });
-    });
-  }
+  const url = `https://www.kaist.ac.kr/kr/html/campus/053001.html?dvs_cd=${name}&stt_dt=${y}-${m}-${d}`;
+  getMenus(url, data => res.json(data));
+});
+
+app.post('/', (req, res) => {
+  const { name } = req.query;
+  const url = `https://www.kaist.ac.kr/kr/html/campus/053001.html?dvs_cd=${name}`;
+  getMenus(url, data => {
+    const { breakfast, lunch, dinner } = data;
+    function title(str) {
+      return {
+        type: 'section',
+        text: {
+          type: 'mrkdwn',
+          text: `*${str}*`
+        }
+      };
+    }
+    function content(str) {
+      return {
+        type: 'section',
+        text: {
+          type: 'plain_text',
+          text: str
+        }
+      };
+    }
+    const blocks = [
+      title('아침'), content(breakfast),
+      title('점심'), content(lunch),
+      title('저녁'), content(dinner),
+    ];
+    res.json({ blocks });
+  });
 });
 
 app.listen(port, () => {
